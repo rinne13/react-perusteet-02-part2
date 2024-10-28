@@ -1,51 +1,38 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Note from './components/Note';
-import './App.css';  // Оставляем подключение стилей
+import './App.css';
 
 const App = () => {
   const [notes, setNotes] = useState([]); 
   const [newNote, setNewNote] = useState('');  
-  const [showAll, setShowAll] = useState(false);  // Теперь по умолчанию показываются важные заметки
+  const [showAll, setShowAll] = useState(false);
 
-  // Используем useEffect для загрузки заметок
+  // Загрузка заметок
   useEffect(() => {
     axios
       .get('http://localhost:3001/notes')
       .then(response => {
         setNotes(response.data);
-      })
+      });
   }, []);
 
-  // Функция добавления новой заметки
-  const addNote = event => {
-    event.preventDefault()
+  console.log('render', notes.length, 'notes');
+
+  // Добавление новой заметки
+  const addNote = (event) => {
+    event.preventDefault();
     const noteObject = {
       content: newNote,
       important: Math.random() > 0.5,
-    }
-  
+    };
+
     axios
       .post('http://localhost:3001/notes', noteObject)
       .then(response => {
-        setNotes(notes.concat(response.data))
-        setNewNote('')
-        console.log(response)
-      })
-
-      setNewNote('');
-  }
-
-  const toggleImportanceOf = (id) => {
-    console.log('importance of ' + id + ' needs to be toggled')
-  }
-
-  
-
-
-  // Обработка изменения текста новой заметки
-  const handleNoteChange = (event) => {
-    setNewNote(event.target.value);
+        setNotes(notes.concat(response.data));
+        setNewNote('');
+      });
   };
 
   // Фильтрация заметок: все или только важные
@@ -53,50 +40,46 @@ const App = () => {
     ? notes
     : notes.filter(note => note.important);
 
-  // Функция изменения важности заметки
-  const changeImportanceOf = (id) => {
-    const updatedNotes = notes.map(note =>
-      note.id === id ? { ...note, important: !note.important } : note
-    );
-    setNotes(updatedNotes);
+  // Смена важности заметки
+  const toggleImportanceOf = (id) => {
+    const note = notes.find(note => note.id === id);
+    const changedNote = { ...note, important: !note.important };
+
+    axios
+      .put(`http://localhost:3001/notes/${id}`, changedNote)
+      .then(response => {
+        setNotes(notes.map(note => note.id !== id ? note : response.data));
+      })
+      .catch(error => {
+        console.error(`The note '${note.content}' was already deleted from the server.`);
+        setNotes(notes.filter(note => note.id !== id));
+      });
   };
 
-  
+  // Обработка изменения текста новой заметки
+  const handleNoteChange = (event) => {
+    setNewNote(event.target.value);
+  };
+
   return (
     <div>
       <h1>Notes</h1>
       <div>
         <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all' }
+          show {showAll ? 'important' : 'all'}
         </button>
-        
-      </div> 
-
-      
+      </div>
 
       <ul>
         {notesToShow.map(note => 
           <Note
             key={note.id}
             note={note} 
-            toggleImportance={() => toggleImportanceOf(note.id)
-            }
-
-            
+            toggleImportance={() => toggleImportanceOf(note.id)}
           />
-          
-          
-        )
-        
-        }
-        
-        
+        )}
       </ul>
 
-      
-
-     
-  
       {/* Форма для добавления новой заметки */}
       <form onSubmit={addNote}>
         <input value={newNote} onChange={handleNoteChange} />
@@ -104,7 +87,6 @@ const App = () => {
       </form>
     </div>
   );
-  
-}
+};
 
 export default App;

@@ -18,6 +18,16 @@
     {
       "id": "11eb",
       "content": "The first computer bug was… a moth!",
+      "important": false
+    },
+    {
+      "id": "7f78",
+      "content": "React.js is a framework",
+      "important": true
+    },
+    {
+      "id": "ab06",
+      "content": "It's hard to understand everything in the same time",
       "important": true
     }
   ]

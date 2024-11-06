@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Note from './components/Note';
 import './App.css';
+import Notification from './components/Notification'
+import Footer from './components/Footer'
 import noteService from './services/notes';
 
 const App = () => {
   const [notes, setNotes] = useState([]);
   const [newNote, setNewNote] = useState('');
   const [showAll, setShowAll] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null); // добавлено состояние для сообщений об ошибках
 
   // Загрузка заметок
   useEffect(() => {
@@ -31,8 +34,13 @@ const App = () => {
         setNotes(notes.map(note => note.id !== id ? note : returnedNote));
       })
       .catch(error => {
-        console.error('Error updating note:', error);
-      });
+        setErrorMessage(
+          `Note '${note.content}' was already removed from server`
+        )
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      })
   };
 
   const handleNoteChange = (event) => {
@@ -57,7 +65,7 @@ const App = () => {
       });
   };
 
-  // Фильтрация заметок: все или только важные
+
   const notesToShow = showAll
     ? notes
     : notes.filter(note => note.important);
@@ -65,6 +73,7 @@ const App = () => {
   return (
     <div>
       <h1>Notes</h1>
+      <Notification message={errorMessage} /> {/* Здесь передаем errorMessage */}
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           show {showAll ? 'important' : 'all'}
@@ -80,12 +89,12 @@ const App = () => {
           />
         )}
       </ul>
-
-      {/* Форма для добавления новой заметки */}
+      
       <form onSubmit={addNote}>
         <input value={newNote} onChange={handleNoteChange} />
         <button type="submit">save</button>
       </form>
+      <Footer />
     </div>
   );
 };

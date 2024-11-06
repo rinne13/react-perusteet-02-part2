@@ -3,7 +3,7 @@
     {
       "id": "1",
       "content": "HTML is easy",
-      "important": true
+      "important": false
     },
     {
       "id": "2",
@@ -29,6 +29,11 @@
       "id": "ab06",
       "content": "It's hard to understand everything in the same time",
       "important": true
+    },
+    {
+      "id": "3502",
+      "content": "The first computer bug was… a moth!",
+      "important": false
     }
   ]
 }
